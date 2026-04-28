@@ -1,0 +1,186 @@
+{
+ "actions": [],
+ "allow_import": 0,
+ "allow_rename": 1,
+ "autoname": "field:tenant_name",
+ "creation": "2026-04-28 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_identity",
+  "tenant_name",
+  "status",
+  "column_break_1",
+  "plan",
+  "isolation_level",
+  "section_connection",
+  "site_url",
+  "api_key",
+  "column_break_2",
+  "api_secret",
+  "section_limits",
+  "max_users",
+  "max_devices",
+  "column_break_3",
+  "max_ai_requests",
+  "ai_mode",
+  "section_ai_config",
+  "ai_endpoint",
+  "ai_api_key",
+  "section_meta",
+  "created_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_identity",
+   "fieldtype": "Section Break",
+   "label": "Tenant Identity"
+  },
+  {
+   "bold": 1,
+   "fieldname": "tenant_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tenant Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Active\nInactive\nSuspended",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Basic",
+   "fieldname": "plan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Plan",
+   "options": "Basic\nPro\nEnterprise"
+  },
+  {
+   "default": "Site",
+   "fieldname": "isolation_level",
+   "fieldtype": "Select",
+   "label": "Isolation Level",
+   "options": "Site\nCompany"
+  },
+  {
+   "fieldname": "section_connection",
+   "fieldtype": "Section Break",
+   "label": "Connection"
+  },
+  {
+   "fieldname": "site_url",
+   "fieldtype": "Data",
+   "label": "Site URL"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API Key"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "api_secret",
+   "fieldtype": "Password",
+   "label": "API Secret"
+  },
+  {
+   "fieldname": "section_limits",
+   "fieldtype": "Section Break",
+   "label": "Usage Limits"
+  },
+  {
+   "default": "10",
+   "fieldname": "max_users",
+   "fieldtype": "Int",
+   "label": "Max Users"
+  },
+  {
+   "default": "20",
+   "fieldname": "max_devices",
+   "fieldtype": "Int",
+   "label": "Max Devices"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1000",
+   "fieldname": "max_ai_requests",
+   "fieldtype": "Int",
+   "label": "Max AI Requests / Month"
+  },
+  {
+   "default": "Local",
+   "fieldname": "ai_mode",
+   "fieldtype": "Select",
+   "label": "AI Mode",
+   "options": "Local\nRemote\nDisabled"
+  },
+  {
+   "fieldname": "section_ai_config",
+   "fieldtype": "Section Break",
+   "label": "AI Configuration"
+  },
+  {
+   "fieldname": "ai_endpoint",
+   "fieldtype": "Data",
+   "label": "Remote AI Endpoint"
+  },
+  {
+   "fieldname": "ai_api_key",
+   "fieldtype": "Password",
+   "label": "Remote AI API Key"
+  },
+  {
+   "fieldname": "section_meta",
+   "fieldtype": "Section Break",
+   "label": "Metadata"
+  },
+  {
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Created At",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-04-28 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Kcsc Ai",
+ "name": "KCSC AI Tenant",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

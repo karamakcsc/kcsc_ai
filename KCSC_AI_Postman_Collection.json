@@ -1,0 +1,355 @@
+{
+  "info": {
+    "name": "KCSC AI Platform",
+    "description": "Complete API test collection for KCSC AI ERPNext Platform.\nImport this file into Postman, set the BASE_URL variable, then run the flows in order.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL",      "value": "https://erpnext-16.kcsc.com.jo", "type": "string" },
+    { "key": "USER",          "value": "Administrator",                    "type": "string" },
+    { "key": "access_token",  "value": "",                                 "type": "string" },
+    { "key": "refresh_token", "value": "",                                 "type": "string" },
+    { "key": "qr_token",      "value": "",                                 "type": "string" },
+    { "key": "action_qr",     "value": "",                                 "type": "string" },
+    { "key": "queue_id",      "value": "",                                 "type": "string" },
+    { "key": "device_id",     "value": "postman-test-001",                 "type": "string" },
+    { "key": "tenant_name",   "value": "erpnext-16.kcsc.com.jo",          "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "Phase 1 — Auth",
+      "item": [
+
+        {
+          "name": "1a. Generate Login QR",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "var qrData = JSON.parse(r.message.qr_data);",
+            "pm.collectionVariables.set('qr_token', qrData.k);",
+            "pm.test('QR generated', () => pm.response.to.have.status(200));",
+            "console.log('QR token:', qrData.k);"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.generate_login_qr",
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "user", "value": "{{USER}}" }
+            ]}
+          }
+        },
+
+        {
+          "name": "1b. QR Login → get tokens",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json().message;",
+            "pm.collectionVariables.set('access_token',  r.access_token);",
+            "pm.collectionVariables.set('refresh_token', r.refresh_token);",
+            "pm.test('Login OK', () => pm.response.to.have.status(200));",
+            "pm.test('Got access token', () => pm.expect(r.access_token).to.not.be.empty);"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.qr_login",
+            "body": { "mode": "raw", "raw": "{\n  \"qr_token\": \"{{qr_token}}\",\n  \"device_id\": \"{{device_id}}\",\n  \"device_name\": \"Postman Test\",\n  \"platform\": \"Web\"\n}" }
+          }
+        },
+
+        {
+          "name": "1c. Refresh Access Token",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json().message;",
+            "pm.collectionVariables.set('access_token', r.access_token);",
+            "pm.test('Refresh OK', () => pm.response.to.have.status(200));"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.refresh",
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "refresh_token", "value": "{{refresh_token}}" },
+              { "key": "device_id",     "value": "{{device_id}}"     }
+            ]}
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Phase 2 — Device",
+      "item": [
+
+        {
+          "name": "2a. Generate Static Pairing QR",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "var qrData = JSON.parse(r.message.qr_data);",
+            "pm.collectionVariables.set('qr_token', qrData.k);",
+            "pm.test('Static QR OK', () => pm.response.to.have.status(200));"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.generate_static_qr",
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "user", "value": "{{USER}}" }
+            ]}
+          }
+        },
+
+        {
+          "name": "2b. Register Device",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Device registered', () => pm.response.to.have.status(200));"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.device.register_device",
+            "body": { "mode": "raw", "raw": "{\n  \"device_id\": \"{{device_id}}\",\n  \"device_name\": \"Postman Test Device\",\n  \"platform\": \"Web\",\n  \"pairing_token\": \"{{qr_token}}\"\n}" }
+          }
+        },
+
+        {
+          "name": "2c. List My Devices",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.device.list_devices"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Phase 3 — Workflow Action Queue",
+      "item": [
+
+        {
+          "name": "3a. Create Workflow Action",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json().message;",
+            "pm.collectionVariables.set('queue_id', r.action_queue_id);",
+            "pm.test('Action queued', () => pm.response.to.have.status(200));",
+            "console.log('Queue ID:', r.action_queue_id, '| Risk:', r.risk_level, '| Auth:', r.required_auth);"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "X-Device-ID",   "value": "{{device_id}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.workflow.create_action",
+            "body": { "mode": "raw", "raw": "{\n  \"action_type\": \"Workflow\",\n  \"reference_doctype\": \"Purchase Order\",\n  \"reference_name\": \"PO-2026-00001\",\n  \"workflow_action\": \"Approve\",\n  \"idempotency_key\": \"postman-test-001\"\n}" }
+          }
+        },
+
+        {
+          "name": "3b. Get Pending Actions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.workflow.get_pending"
+          }
+        },
+
+        {
+          "name": "3c. Generate Action Confirmation QR",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "var qrData = JSON.parse(r.message.qr_data);",
+            "pm.collectionVariables.set('action_qr', qrData.k);",
+            "pm.test('Action QR OK', () => pm.response.to.have.status(200));",
+            "console.log('Action QR token:', qrData.k);"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.generate_action_qr",
+            "body": { "mode": "raw", "raw": "{\n  \"action_queue_id\": \"{{queue_id}}\"\n}" }
+          }
+        },
+
+        {
+          "name": "3d. Confirm Action (QR)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "pm.test('Action confirmed', () => pm.response.to.have.status(200));"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.workflow.confirm_action",
+            "body": { "mode": "raw", "raw": "{\n  \"action_queue_id\": \"{{queue_id}}\",\n  \"confirmation_token\": \"{{action_qr}}\",\n  \"confirmation_method\": \"QR\"\n}" }
+          }
+        },
+
+        {
+          "name": "3e. Poll Action Status",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.workflow.get_action_status?action_queue_id={{queue_id}}",
+              "query": [{ "key": "action_queue_id", "value": "{{queue_id}}" }]
+            }
+          }
+        },
+
+        {
+          "name": "3f. Reject Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.workflow.reject_action",
+            "body": { "mode": "raw", "raw": "{\n  \"action_queue_id\": \"{{queue_id}}\",\n  \"reason\": \"Testing rejection flow\"\n}" }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Phase 4 — AI Integration",
+      "item": [
+
+        {
+          "name": "4a. AI Query (immediate answer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.ai.request",
+            "body": { "mode": "raw", "raw": "{\n  \"action_type\": \"query\",\n  \"doctype\": \"Purchase Order\",\n  \"name\": \"PO-2026-00001\",\n  \"query\": \"What is the current status of this order?\"\n}" }
+          }
+        },
+
+        {
+          "name": "4b. AI Workflow Action (→ queue)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json().message;",
+            "if (r.action_queue_id) pm.collectionVariables.set('queue_id', r.action_queue_id);",
+            "pm.test('AI action queued', () => pm.response.to.have.status(200));"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "X-Device-ID",   "value": "{{device_id}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.ai.request",
+            "body": { "mode": "raw", "raw": "{\n  \"action_type\": \"workflow\",\n  \"doctype\": \"Purchase Order\",\n  \"name\": \"PO-2026-00001\",\n  \"action\": \"Approve\"\n}" }
+          }
+        },
+
+        {
+          "name": "4c. AI Request History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": { "raw": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.ai.history?limit=10",
+              "query": [{ "key": "limit", "value": "10" }] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Phase 5 — Tenant Management",
+      "item": [
+
+        {
+          "name": "5a. List Tenants",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.tenant.list_tenants"
+          }
+        },
+
+        {
+          "name": "5b. Tenant Details + Usage",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.tenant.get_tenant?tenant_name={{tenant_name}}",
+              "query": [{ "key": "tenant_name", "value": "{{tenant_name}}" }]
+            }
+          }
+        },
+
+        {
+          "name": "5c. Live Usage Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.tenant.usage_stats?tenant_name={{tenant_name}}",
+              "query": [{ "key": "tenant_name", "value": "{{tenant_name}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Phase 6 — Action Replay",
+      "item": [
+
+        {
+          "name": "6a. Replay Failed Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.replay.replay_action",
+            "body": { "mode": "raw", "raw": "{\n  \"action_queue_id\": \"{{queue_id}}\"\n}" }
+          }
+        },
+
+        {
+          "name": "6b. Document History",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.replay.replay_history?reference_doctype=Purchase+Order&reference_name=PO-2026-00001",
+              "query": [
+                { "key": "reference_doctype", "value": "Purchase Order" },
+                { "key": "reference_name",    "value": "PO-2026-00001" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Logout",
+      "item": [
+        {
+          "name": "Logout (revoke all tokens)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": "{{BASE_URL}}/api/method/kcsc_ai.kcsc_ai.api.auth.logout"
+          }
+        }
+      ]
+    }
+
+  ]
+}

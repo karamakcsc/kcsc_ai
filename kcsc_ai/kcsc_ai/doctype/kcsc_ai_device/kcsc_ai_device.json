@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "allow_import": 0,
+ "allow_rename": 0,
+ "autoname": "KCSC-DEV-.YYYY.-.#####",
+ "creation": "2026-04-28 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_device_identity",
+  "device_id",
+  "device_name",
+  "column_break_1",
+  "user",
+  "platform",
+  "section_trust",
+  "trusted",
+  "is_blocked",
+  "column_break_2",
+  "failed_attempts",
+  "last_active",
+  "section_network",
+  "last_ip",
+  "device_fingerprint"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_device_identity",
+   "fieldtype": "Section Break",
+   "label": "Device Identity"
+  },
+  {
+   "bold": 1,
+   "fieldname": "device_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device ID",
+   "reqd": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "device_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Device Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "platform",
+   "fieldtype": "Select",
+   "label": "Platform",
+   "options": "Android\niOS\nWeb\nDesktop",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_trust",
+   "fieldtype": "Section Break",
+   "label": "Trust & Security"
+  },
+  {
+   "default": "0",
+   "fieldname": "trusted",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Trusted"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_blocked",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Blocked"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "failed_attempts",
+   "fieldtype": "Int",
+   "label": "Failed Attempts"
+  },
+  {
+   "fieldname": "last_active",
+   "fieldtype": "Datetime",
+   "label": "Last Active",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_network",
+   "fieldtype": "Section Break",
+   "label": "Network"
+  },
+  {
+   "fieldname": "last_ip",
+   "fieldtype": "Data",
+   "label": "Last IP Address"
+  },
+  {
+   "fieldname": "device_fingerprint",
+   "fieldtype": "Small Text",
+   "label": "Device Fingerprint"
+  }
+ ],
+ "links": [],
+ "modified": "2026-04-28 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Kcsc Ai",
+ "name": "KCSC AI Device",
+ "naming_rule": "Autoname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 0,
+   "export": 1,
+   "print": 0,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
