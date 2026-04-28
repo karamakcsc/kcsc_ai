@@ -11,6 +11,13 @@ app_license = "mit"
 after_install = "kcsc_ai.install.after_install"
 
 # -----------------------------------------------------------------------
+# Auth Hook — lets Frappe's validate_auth() accept KCSC Bearer tokens
+# -----------------------------------------------------------------------
+auth_hooks = [
+	"kcsc_ai.kcsc_ai.api.middleware.validate_kcsc_bearer_token",
+]
+
+# -----------------------------------------------------------------------
 # Document Events
 #
 # RULE: hooks are used ONLY for lightweight validation and audit logging.

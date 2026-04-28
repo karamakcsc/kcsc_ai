@@ -72,6 +72,36 @@ def _get_client_ip() -> str:
 		return ""
 
 
+def validate_kcsc_bearer_token():
+	"""
+	Frappe auth hook (registered in hooks.py:auth_hooks).
+
+	Frappe's validate_auth() raises AuthenticationError if any Authorization
+	header is present but the session user is still Guest after OAuth and API-key
+	checks. We intercept here so our custom KCSC Bearer tokens pass that check.
+	"""
+	auth = frappe.get_request_header("Authorization", "")
+	if not auth.startswith("Bearer "):
+		return
+
+	raw_token = auth[7:].strip()
+	if not raw_token:
+		return
+
+	try:
+		from kcsc_ai.kcsc_ai.services.token_service import validate_access_token
+		user = validate_access_token(raw_token)
+		if user:
+			# frappe.set_user() resets frappe.local.form_dict — save and restore it
+			# so the endpoint function receives its parameters correctly.
+			# Same pattern used by frappe.auth.validate_api_key_secret.
+			saved_form_dict = frappe.local.form_dict
+			frappe.set_user(user)
+			frappe.local.form_dict = saved_form_dict
+	except Exception:
+		pass  # Invalid/expired token — endpoint-level require_token() returns the precise error
+
+
 def success(data: dict | list, message: str = "ok") -> dict:
 	"""Standardised success envelope for all KCSC AI API responses."""
 	return {"status": "success", "message": message, "data": data}

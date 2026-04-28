@@ -41,7 +41,7 @@ def generate_login_qr(user: str) -> dict:
 	return {"qr_data": payload["qr_data"], "expires_in": payload["expires_in"], "qr_type": "login"}
 
 
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def generate_action_qr(action_queue_id: str) -> dict:
 	"""
 	Generate a one-time action-confirmation QR for an Awaiting Confirmation queue entry.
